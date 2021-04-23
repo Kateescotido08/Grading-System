@@ -1,0 +1,9 @@
+# depslib dependency file v1.0
+1608689142 source:c:\users\escot\onedrive\desktop\file handling\main.c
+	<stdio.h>
+	<stdlib.h>
+	<ctype.h>
+	<windows.h>
+	<conio.h>
+	<mmsystem.h>
+

@@ -1,317 +1,158 @@
 #include <stdio.h>
 #include <stdlib.h>
-#include <conio.h>
-#include <string.h>
-#include <unistd.h>
+#include <ctype.h>
+#include <windows.h> //HEADER FILE FOR gotoxy
+#include <conio.h> //FUNCTION FOR getch()
+#include <mmsystem.h> //HEADER FILE FOR PLAYSOUND
 
-struct studData{
-        float s1,s2,s3,s4;
-        char name[100];
+COORD coord = { 0, 0 }; //GLOBAL VARIABLE, CENTER OF AXIS IS SET TO THE TOP LEFT CORNER OF THE OUTPUT SCREEN
 
-}a;
-FILE *scores;
+void Print();
+void load();
+int compGrade(FILE* grades,char name[30],float grade1,float grade2,float grade3,float grade4);
 
-void login()
+void gotoxy(int x, int y)
 {
-	int a=0,i=0;
-    char uname[10],c=' ';
-    char pword[10],code[10];
-    char user[10]="user";
-    char pass[10]="pass";
-    do
-{
-
-    printf("\n  ::::::::::::::::::::::::::  LOGIN FORM  ::::::::::::::::::::::::::  ");
-    printf(" \n                       ENTER USERNAME:-");
-	scanf("%s", &uname);
-	printf(" \n                       ENTER PASSWORD:-");
-	while(i<10)
-	{
-	    pword[i]=getch();
-	    c=pword[i];
-	    if(c==13) break;
-	    else printf("*");
-	    i++;
-	}
-	pword[i]='\0';
-	i=0;
-		if(strcmp(uname,"user")==0 && strcmp(pword,"pass")==0)
-	{
-	printf("  \n\n\n       WELCOME TO EMPLOYEE RECORD MANAGEMENT SYSTEM !!!! LOGIN IS SUCCESSFUL");
-	    printf("\n LOADING PLEASE WAIT... \n");
-    for(i=0; i<3; i++)
-    {
-        printf(".");
-        sleep(500);
-    }
-	printf("\n\n\n\t\t\t\tPress any key to continue...");
-	getch();//holds the screen
-	break;
-	}
-	else
-	{
-		printf("\nSORRY !!!!  LOGIN IS UNSUCESSFUL");
-		a++;
-
-		getch();//holds the screen
-	}
-}
-	while(a<=2);
-	if (a>2)
-	{
-		printf("\nSorry you have entered the wrong username and password for four times!!!");
-
-		getch();
-
-    }
-		system("cls");
+    coord.X = x; coord.Y = y;
+    SetConsoleCursorPosition(GetStdHandle(STD_OUTPUT_HANDLE), coord);
 }
 
-int cFile()
+void Print()
 {
-    scores = fopen("data.txt","rb+");
-     if(scores == NULL)
-    {
-        scores = fopen("data.txt","wb+");
-        if(scores == NULL)
-        {
-            printf("Cannot open file");
-            exit(1);
-        }
-    }
-    return 0;
+   gotoxy(50,10);
+   printf("WELCOME!\n\n\t\t\t\tPress Any key to see the Grades of the Students\n");
 
-}
+//PlaySound(TEXT("C:\\Users\\escot\\OneDrive\\Desktop\\FILE HANDLING\\welcome.wav"),NULL,SND_SYNC);
 
-void newStud()
-{
-    char ch;
-    char sav;
-    long int recsize;
-    recsize=sizeof(a);
-    system("cls");
-
-            ch = 'y';
-            while(ch == 'y')
-    {
-        printf("ENTER STUDENT NAME:");
-       scanf(" %[^\n]s",a.name);
-
-       printf("ENTER SCORE 1: ");
-       scanf("%f",&a.s1);
-
-       printf("ENTER SCORE 2: ");
-       scanf("%f",&a.s2);
-
-       printf("ENTER SCORE 3: ");
-       scanf("%f",&a.s3);
-
-       printf("ENTER SCORE 4: ");
-       scanf("%f",&a.s4);
-
-       printf("\nSAVE THIS RECORD? y/n:");
-       scanf("%s",&sav);
-
-                   if (sav=='y')
-                    {
-
-                       fwrite(&a,recsize,1,scores);
-                        printf("Saving this record....");
-                    }
-                    else
-                    {
-                        printf("SAVING CANCELLED");
-                    }
-
-       printf("\n\nDO YOU WANT TO ADD ANOTHER?[Y/N]: ");
-       scanf("%s",&ch);
-    }
-}
-void edStud()
-{
-    char sname[100];
-    char edit,ch;
-    int test=0,i=0;
-    long int recsize;
-    recsize=sizeof(a);
-
-     system("cls");
-            do
-            {
-                printf("SEARCH STUDENT NAME: ");
-
-                scanf("%s",&sname);
-                rewind(scores);
-                while(fread(&a,recsize,1,scores)==1)  /// fetch all record from file
-                {
-                    if(strcmp(a.name,sname) == 0)  ///if entered name matches with that in file
-                    {
-                        printf("SCORE 1:%.2f   SCORE 2: %.2f    SCORE 3:%.2f    SCORE 4:%.2f",a.s1,a.s2,a.s3,a.s4);
-
-                        printf("\nWhich scores would you like to EDIT[1/2/3/4]?:");
-                        scanf("%s",&edit);
-                        switch (edit)
-                        {
-                        case '1':
-                        printf("\nENTER NEW GRADE 1:");
-                        scanf("%f",&a.s1);
-                        break;
-
-                        case '2':
-                        printf("\nENTER NEW GRADE 2:");
-                        scanf("%f",&a.s2);
-                        break;
-
-                        case '3':
-                        printf("\nENTER NEW GRADE 3:");
-                        scanf("%f",&a.s3);
-                        break;
-
-                       case '4':
-                        printf("\nENTER NEW GRADE 4:");
-                        scanf("%f",&a.s4);
-                        break;
-                    }
-                        fseek(scores,-recsize,SEEK_CUR); /// move the cursor 1 step back from current position
-                        fwrite(&a,recsize,1,scores);/// override the record
-                        test+=2;
-                        break;
-                    }
-                i+=1;
-                }
-                if (i>test)
-                {
-                        printf("RECORD DOES NOT EXIST");
-                }
-                printf("i=%d",i);
-                printf("test=%d",test);
-
-                printf("\nModify another record(y/n)?:");
-                scanf("%s",&ch);
-            }
-            while (ch=='y'||ch=='Y');
-}
-
-void delStud()
-{
-    char ch;
-    char sname[100];
-    long int recsize;
-    FILE *ft;
-    recsize = sizeof(a);
-    system("cls");
-
-            ch = 'y';
-            while(ch == 'y')
-            {
-                printf("\nEnter name of employee to delete: ");
-                scanf("%s",sname);
-                ft = fopen("Temp.dat","wb");  /// create a intermediate file for temporary storage
-                rewind(scores); /// move record to starting of file
-                while(fread(&a,recsize,1,scores) == 1)  /// read all records from file
-                {
-                    if(strcmp(a.name,sname) != 0)  /// if the entered record match
-                    {
-                        fwrite(&a,recsize,1,ft); /// move all records except the one that is to be deleted to temp file
-                    }
-                }
-                fclose(scores);
-                fclose(ft);
-                remove("data.txt"); /// remove the orginal file
-                rename("Temp.dat","data.txt"); /// rename the temp file to original file name
-                scores = fopen("data.txt", "rb+");
-                printf("Delete another record(y/n)");
-                fflush(stdin);
-                ch = getche();
-            }
-}
-void sStud()
-{
-    char sname[100];
-    long int recsize;
-    recsize=sizeof(a);
-
-    printf("Search Student:");
-                scanf("%s",&sname);
-                rewind(scores);
-                while(fread(&a,recsize,1,scores)==1)  /// fetch all record from file
-                {
-                    if(strcmp(a.name,sname) == 0)  ///if entered name matches with that in file
-                    {
-                         printf("\n%s\t%.2f\t%.2f\t%.2f\t%.2f\n\n",a.name,a.s1,a.s2,a.s3,a.s4);
-                    }
-                }
-}
-
-void dStud()
-{
-    long int recsize;
-    recsize=sizeof(a);
-
-            system("cls");
-            printf("STUDENTS's RECORD LIST)");
-            rewind(scores); ///this moves file cursor to start of the file
-            while(fread(&a,recsize,1,scores)==1)  /// read the file and fetch the record one record per fetch
-            {
-                printf("\n%s\t%.2f\t%.2f\t%.2f\t%.2f",a.name,a.s1,a.s2,a.s3,a.s4);
-            }
     getch();
+    system("cls");
+
+    gotoxy(30,10);
+    printf("PROGRAMMERS: JAMIEL R. SUMERACRUZ and KATE FEBE B. ESCOTIDO");
+
+     //PlaySound(TEXT("C:\\Users\\escot\\OneDrive\\Desktop\\FILE HANDLING\\programmers.wav"),NULL,SND_SYNC);
+
+     if(getch()==27)
+   exit(0);
 }
 
-int main()
+void load()
 {
-  // login();
-    float s1,s2,s3,s4;
-    char sname[20],name[100];
-    int menu,passed,failed;
-    char sav;
-    char ch;
-    char edit,type;
-    float average;
-    long int recsize;
-    struct studData a;
-    float a1,a2,a3,a4;
+    system("cls");
+    int r,q;
 
-    FILE* scores;
-    FILE* ft;
-    FILE *dat;
+    gotoxy(30,26);
+    printf("LOADING...");
 
-    recsize=sizeof(a);
-    while(1)
+    gotoxy(45,26);
+    for(r=0;r<=20;r++)
     {
-        printf("\t\n\tMAIN MENU\t");
-        printf("\n\tWANT DO YOU WANT TO DO?\n");
-        printf("\n1.] Add New Student \t\n2.] Edit Student \t\n3.] Delete Student \t\n4.] Display Student \t\n5.] Display All \t\n6.] Compute Grade \t\n7.] Exit\n");
-
-        printf("\nEnter Choice [1/2/3/4/5/6] :");
-        scanf("%d",&menu);
-
-        switch (menu)
-        {
-            case 1:
-                   newStud();
-                   break;
-
-            case 2:
-                    edStud();
-                    break;
-
-            case 3:
-                    delStud();
-                    break;
-
-            case 4:
-                    sStud();
-                    break;
-            case 5:
-                    dStud();
-                    break;
-
-            case 7:
-                    exit(0);
-        }
+        for(q=1;q<=100000000;q++);
+        printf("%c",177);
     }
+    //PlaySound(TEXT("C:\\Users\\escot\\OneDrive\\Desktop\\FILE HANDLING\\loading.wav"),NULL,SND_SYNC);
+}
+//MAIN PROGRAM
+int main (void)
+{
+    system("color 5D");
+    Print();
+    load();
+
+    float grade1,grade2,grade3,grade4;
+    char name[30];
+
+        FILE *grades;
+    FILE *printNew;
+
+    grades=fopen("average.txt","r");
+    printNew=fopen("GRADE.txt","w");
+
+    if (grades==NULL)
+        {
+            printf("\nERROR READING FILE");
+            return 0;
+        }
+    if (printNew==NULL)
+        {
+            printf("\nERROR WRITING FILE");
+            return 1;
+        }
+
+    compGrade(grades,name,grade1,grade2,grade3,grade4);
+
+    fclose(grades);
+
+    printf("\n\n\t\tA = 90>\n\t\tB = 81-90 \n\t\tC = 75-80 \n\t\tF = <75\n\n\n");
+
+    //PlaySound(TEXT("C:\\Users\\escot\\OneDrive\\Desktop\\FILE HANDLING\\beep.wav"),NULL,SND_SYNC);
+
     return 0;
 }
 
+ int compGrade(FILE* grades,char name[30],float grade1,float grade2,float grade3,float grade4)
+ {
+    double average;
+    int passed=0, failed=0;
+    char type;
+    FILE *printNew;
 
+    printNew=fopen("GRADE.txt","w");
+
+    gotoxy(17 , 5);
+    printf("\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2 GRADES PROGRAM \xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2");
+
+    gotoxy(17, 26);
+    printf("\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2\xB2");
+
+    gotoxy(5, 6);
+    printf("============================================================================");
+
+    gotoxy(12, 7);
+    printf("STUDENT NAME\t\tGWA\t\tGRADE LETTER ");
+
+    gotoxy(5, 8);
+    printf("============================================================================\n");
+
+    fprintf(printNew,"===================================================================");
+    fprintf(printNew,"\nSTUDENT NAME\t\tGWA\t\t\tGRADE LETTER\n");
+    fprintf(printNew,"===================================================================");
+
+    while(fscanf(grades,"%s %f %f %f %f",name,&grade1,&grade2,&grade3,&grade4)!=EOF)
+    {
+          average=(grade1+grade2+grade3+grade4)/4;
+
+     if(average>=90)
+    {
+        type='A';
+        passed++;
+    }
+    else if((average>=81)&&(average<=91))
+    {
+        type='B';
+        passed++;
+    }
+    else if((average>=75)&&(average<=80))
+    {
+        type='C';
+        failed++;
+    }
+    else if(average<75)
+    {
+        type='F';
+        failed++;
+    }
+
+    printf("\n\t\t%s\t\t\t%.2f \t\t%c",name,average,type);
+    fprintf(printNew,"\n%s\t\t\t%.2f\t\t\t%c",name,average,type);
+    }
+
+       printf("\n\n\t\tTOTAL PASSED : %d",passed);
+       printf("\n\t\tTOTAL FAILED : %d",failed);
+
+        fprintf(printNew,"\n\nTOTAL PASSED: %d",passed);
+        fprintf(printNew,"\nTOTAL FAILED: %d",failed);
+        fprintf(printNew,"\n\nA = 90>\nB = 81-90 \nC = 75-80 \nF = <75\n");
+
+    return 0;
+ }
